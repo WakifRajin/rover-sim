@@ -41,6 +41,8 @@
 
 # Visual Studio cache directory
 .vs/
+.vscode/
+.puku/
 
 # Gradle cache directory
 .gradle/
