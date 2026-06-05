@@ -1,0 +1,68 @@
+<?xml version="1.0"?>
+<sdf version="1.6">
+  <model name="climbing_helmet_with_light">
+    <static>true</static>
+    <include>
+      <uri>https://fuel.ignitionrobotics.org/1.0/OpenRobotics/models/Artifact Proximity Detector</uri>
+   </include>
+
+    <link name="link">
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>meshes/CavingHelmet.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>meshes/CavingHelmet.dae</uri>
+          </mesh>
+        </geometry>
+        <material>
+          <diffuse>1.0 1.0 1.0</diffuse>
+          <specular>1.0 1.0 1.0</specular>
+          <pbr>
+            <metal>
+              <albedo_map>materials/textures/CavingHelmet_Albedo.jpg</albedo_map>
+              <normal_map>materials/textures/CavingHelmet_Normal.jpg</normal_map>
+              <roughness_map>materials/textures/CavingHelmet_Roughness.jpg</roughness_map>
+              <emissive_map>materials/textures/CavingHelmet_Emissive.jpg</emissive_map>
+            </metal>
+          </pbr>
+          <!-- fallback to script if no PBR support-->
+          <script>
+            <uri>materials/scripts/</uri>
+            <uri>/materials/textures/</uri>
+            <name>ClimbingHelmetWithLight_Diffuse</name>
+          </script>
+        </material>
+        <plugin
+          filename="ignition-gazebo-thermal-system"
+          name="ignition::gazebo::systems::Thermal">
+          <heat_signature>materials/textures/CavingHelmet_Heatmap_Albedo.png</heat_signature>
+          <max_temp>294.15</max_temp>
+        </plugin>
+      </visual>
+      <light name="headlamp" type="spot">
+        <pose frame="">0.138 0 0.113 3.14159 1.56859 0</pose>
+        <attenuation>
+          <range>10</range>
+          <linear>0</linear>
+          <constant>0.1</constant>
+          <quadratic>0.0025</quadratic>
+        </attenuation>
+        <diffuse>0.8 0.8 0.5 1</diffuse>
+        <specular>0.8 0.8 0.5 1</specular>
+        <spot>
+          <inner_angle>1</inner_angle>
+          <outer_angle>1.1</outer_angle>
+          <falloff>1</falloff>
+        </spot>
+        <direction>0 0 -1</direction>
+        <cast_shadows>0</cast_shadows>
+      </light>
+    </link>
+  </model>
+</sdf>
