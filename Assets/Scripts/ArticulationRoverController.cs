@@ -21,6 +21,14 @@ public class ArticulationRoverController : MonoBehaviour
     [Header("Drive Tuning")]
     [SerializeField] private float driveForceLimit = 500f;
     [SerializeField] private float driveDamping = 20f;
+    [SerializeField] private float leftSideSpeedScale = 1f;
+    [SerializeField] private float rightSideSpeedScale = 1f;
+
+    [Header("Straight-Line Drift Compensation")]
+    [SerializeField] private bool headingHoldWhenNoTurnInput = true;
+    [SerializeField] private float headingRateDamping = 1.0f;
+    [SerializeField] private float turnInputDeadzone = 0.05f;
+    [SerializeField] private float linearSpeedThreshold = 0.05f;
 
     [Header("Input (New Input System)")]
     [SerializeField] private InputActionReference driveAction;
@@ -106,14 +114,22 @@ public class ArticulationRoverController : MonoBehaviour
         float targetLinear = linearInput * maxLinearSpeed;
         float targetAngular = angularInput * maxAngularSpeed;
 
+        if (headingHoldWhenNoTurnInput && Mathf.Abs(angularInput) < turnInputDeadzone && Mathf.Abs(targetLinear) > linearSpeedThreshold)
+        {
+            float yawRate = rootBody != null ? rootBody.angularVelocity.y : 0f;
+            targetAngular += -yawRate * headingRateDamping;
+        }
+
+        targetAngular = Mathf.Clamp(targetAngular, -maxAngularSpeed, maxAngularSpeed);
+
         float vLeft = targetLinear - (targetAngular * (wheelbase * 0.5f));
         float vRight = targetLinear + (targetAngular * (wheelbase * 0.5f));
 
         float omegaLeftRad = vLeft / wheelRadius;
         float omegaRightRad = vRight / wheelRadius;
 
-        float omegaLeftDeg = omegaLeftRad * Mathf.Rad2Deg;
-        float omegaRightDeg = omegaRightRad * Mathf.Rad2Deg;
+        float omegaLeftDeg = (omegaLeftRad * Mathf.Rad2Deg) * leftSideSpeedScale;
+        float omegaRightDeg = (omegaRightRad * Mathf.Rad2Deg) * rightSideSpeedScale;
 
         ApplyWheelVelocity(wheelFL, omegaLeftDeg);
         ApplyWheelVelocity(wheelBL, omegaLeftDeg);

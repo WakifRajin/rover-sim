@@ -20,9 +20,12 @@ public class RosTfPublisher : MonoBehaviour
     [SerializeField] private string tfTopic = "/tf";
     [SerializeField] private string tfStaticTopic = "/tf_static";
     [SerializeField] private string worldFrame = "map";
+    [SerializeField] private string odomFrame = "odom";
     [SerializeField] private string baseFrame = "base_link";
     [SerializeField] private Transform rootTransform;
-    [SerializeField] private bool publishRootTransform = true;
+    [SerializeField] private bool publishRootTransform;
+    [SerializeField] private bool publishMapToOdomIdentity = true;
+    [SerializeField] private bool republishStaticFramesOnTf = true;
     [SerializeField] private float publishRateHz = 30f;
     [SerializeField] private FrameLink[] frames;
 
@@ -106,10 +109,33 @@ public class RosTfPublisher : MonoBehaviour
     {
         List<TransformStampedMsg> transforms = new List<TransformStampedMsg>();
 
+        if (publishMapToOdomIdentity && !string.IsNullOrWhiteSpace(worldFrame) && !string.IsNullOrWhiteSpace(odomFrame) && worldFrame != odomFrame)
+        {
+            transforms.Add(BuildTransform(worldFrame, odomFrame, Vector3.zero, Quaternion.identity, now));
+        }
+
         if (publishRootTransform && rootTransform != null)
         {
             TransformStampedMsg rootMsg = BuildTransform(worldFrame, baseFrame, rootTransform.position, rootTransform.rotation, now);
             transforms.Add(rootMsg);
+        }
+
+        if (republishStaticFramesOnTf && frames != null)
+        {
+            foreach (FrameLink frame in frames)
+            {
+                if (frame == null || !frame.isStatic)
+                {
+                    continue;
+                }
+
+                if (!TryBuildTransform(frame, now, out TransformStampedMsg msg))
+                {
+                    continue;
+                }
+
+                transforms.Add(msg);
+            }
         }
 
         if (frames != null)
@@ -147,6 +173,11 @@ public class RosTfPublisher : MonoBehaviour
         }
 
         Transform parentTransform = frame.parentTransform;
+        if (parentTransform == null && frame.parentFrame == baseFrame)
+        {
+            parentTransform = rootTransform;
+        }
+
         Vector3 localPos = parentTransform != null
             ? parentTransform.InverseTransformPoint(frame.childTransform.position)
             : frame.childTransform.position;

@@ -1205,7 +1205,7 @@ Camera:
   field of view: 60
   orthographic: 0
   orthographic size: 5
-  m_Depth: 0
+  m_Depth: 10
   m_CullingMask:
     serializedVersion: 2
     m_Bits: 4294967295
@@ -1586,6 +1586,12 @@ MonoBehaviour:
   centerOfMassYOffset: -0.2
   driveForceLimit: 400
   driveDamping: 20
+  leftSideSpeedScale: 1
+  rightSideSpeedScale: 1
+  headingHoldWhenNoTurnInput: 1
+  headingRateDamping: 1
+  turnInputDeadzone: 0.05
+  linearSpeedThreshold: 0.05
   driveAction: {fileID: 1610043807}
   invertLinear: 0
   invertAngular: 1
@@ -2120,10 +2126,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RosTfPublisher
   tfTopic: /tf
   tfStaticTopic: /tf_static
-  worldFrame: map
-  baseFrame: base_link
-  rootTransform: {fileID: 5527467949394454767}
+  worldFrame: odom
+  odomFrame: odom
+  baseFrame: base_footprint
+  rootTransform: {fileID: 474215879622535007}
   publishRootTransform: 1
+  publishMapToOdomIdentity: 1
+  republishStaticFramesOnTf: 1
   publishRateHz: 30
   frames:
   - parentFrame: base_link
@@ -2150,6 +2159,11 @@ MonoBehaviour:
     childFrame: camera_link
     parentTransform: {fileID: 5527467949394454767}
     childTransform: {fileID: 363520256}
+    isStatic: 0
+  - parentFrame: base_footprint
+    childFrame: base_link
+    parentTransform: {fileID: 474215879622535007}
+    childTransform: {fileID: 5527467949394454767}
     isStatic: 0
 --- !u!114 &3371934710391227389
 MonoBehaviour:
